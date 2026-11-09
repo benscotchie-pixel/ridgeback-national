@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta charset="utf-8">
+<title>Watch Ben Play</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<style>
+  /* One full-screen broadcast view with a slim control bar. Deliberately dark only. */
+  :root { color-scheme: dark; --bg: #070c0a; --fg: #eef3ef; --bar: rgba(8, 14, 12, .82); --line: #2c3d34; --btn: #17251d; --gold: #e8b931; --red: #9e231c; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--fg); font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; overflow: hidden; }
+  [hidden] { display: none !important; }
+  .stage { position: fixed; inset: 0; }
+  #view { display: block; width: 100%; height: 100%; }
+  .title { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); top: calc(14px + env(safe-area-inset-top, 0px)); text-align: right; text-transform: uppercase; letter-spacing: .12em; pointer-events: none; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+  .title b { display: block; font-size: 20px; font-weight: 700; color: var(--gold); }
+  .title span { font-size: 13px; opacity: .85; }
+  #controls { position: fixed; left: 0; right: 0; bottom: 0; background: var(--bar); border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); transition: opacity .3s; }
+  #controls.dim { opacity: .35; }
+  #controls.dim:hover { opacity: 1; }
+  button, select { font-weight: 600; font-size: 15px; line-height: 1; font-family: inherit; letter-spacing: .08em; text-transform: uppercase; color: var(--fg); background: var(--btn); border: 1px solid #36503f; border-radius: 3px; padding: 9px 14px; cursor: pointer; }
+  select { text-transform: none; letter-spacing: .02em; max-width: 100%; }
+  button.go { background: var(--red); border-color: #c2453b; }
+  button:hover { filter: brightness(1.2); }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  label { display: inline-flex; gap: 8px; align-items: center; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #a9bbb0; margin-left: auto; }
+  #stop { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); top: calc(64px + env(safe-area-inset-top, 0px)); z-index: 3; background: rgba(0,0,0,.6); }
+
+  /* broadcast graphics */
+  #overlay { position: fixed; inset: 0; pointer-events: none; text-transform: uppercase; color: #fff; }
+  .bug { position: absolute; left: calc(16px + env(safe-area-inset-left, 0px)); top: calc(16px + env(safe-area-inset-top, 0px)); min-width: 220px; background: linear-gradient(180deg, #0f2b52, #081a33); border-left: 5px solid var(--gold); box-shadow: 0 6px 20px rgba(0,0,0,.35); }
+  .bug-course { font-size: 13px; letter-spacing: .14em; padding: 5px 12px; background: rgba(255,255,255,.08); color: var(--gold); font-weight: 600; }
+  .bug-row { display: flex; gap: 14px; align-items: center; padding: 5px 12px; font-size: 18px; font-weight: 600; letter-spacing: .04em; }
+  .bug-hole { background: var(--gold); color: #081a33; padding: 0 9px; font-weight: 700; }
+  .bug-player { border-top: 1px solid rgba(255,255,255,.12); font-size: 16px; }
+  .bug-shot { color: #9fc2ef; margin-left: auto; }
+  .bug-score { min-width: 28px; text-align: right; font-weight: 700; }
+  .bug-score.under { color: #ff5a4e; }
+  .lower { position: absolute; left: 50%; bottom: 96px; transform: translate(-50%, 24px); opacity: 0; transition: opacity .35s, transform .35s; text-align: center; }
+  .lower.in { opacity: 1; transform: translate(-50%, 0); }
+  .lt-title { display: inline-block; font-size: clamp(22px, 3.4vw, 40px); font-weight: 700; letter-spacing: .03em; padding: 4px 28px; background: linear-gradient(180deg, #123665, #0a2245); border-bottom: 4px solid var(--gold); box-shadow: 0 8px 24px rgba(0,0,0,.4); white-space: nowrap; }
+  .lt-title.red { border-bottom-color: #ff5a4e; }
+  .lt-sub { display: block; width: max-content; margin: 0 auto; font-size: clamp(13px, 1.6vw, 18px); font-weight: 600; letter-spacing: .08em; padding: 4px 18px; background: rgba(8, 20, 40, .82); color: #d6e4f5; }
+  @media (max-width: 640px) { .bug { transform: scale(.78); transform-origin: top left; } label { margin-left: 0; } .title { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .lower { transition: none; } }
+  #status { position: fixed; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; font-size: 22px; letter-spacing: .08em; text-transform: uppercase; color: #a9bbb0; pointer-events: none; }
+  #status.err { color: #ffb4ab; text-transform: none; letter-spacing: 0; font-size: 18px; }
+</style>
+<script>
+  // Loading message, plus an on-screen report if the 3D code fails (so a viewer isn't left with a blank page).
+  window.showStatus = (msg, err) => { const s = document.getElementById('status'); if (!s) return; s.textContent = msg; s.className = err ? 'err' : ''; s.hidden = !msg; };
+  const fail = (m) => window.showStatus("Sorry, the 3D course couldn't start in this browser. Try Chrome. (" + m + ')', true);
+  addEventListener('error', (e) => fail(e.message || 'script error'));
+  addEventListener('unhandledrejection', (e) => fail(String(e.reason?.message || e.reason)));
+</script>
+
+<div class="stage">
+  <canvas id="view" aria-label="3D broadcast of Ben playing Ridgeback National"></canvas>
+  <div id="overlay" hidden><div class="bug"></div><div class="lower"></div></div>
+</div>
+<div id="status">Loading the course…</div>
+<div class="title"><b>Ridgeback National</b><span>Watch Ben play</span></div>
+<button id="stop" hidden>■ Stop</button>
+<div id="controls">
+  <select id="hole" aria-label="Hole"></select>
+  <button class="go" id="watch">▶ Watch this hole</button>
+  <button id="round">Play all 18</button>
+  <label>Graphics <select id="quality" aria-label="Graphics quality"></select></label>
+</div>
+
+<script type="module" src="src/watch.js" onerror="fail('could not load src/watch.js')"></script>

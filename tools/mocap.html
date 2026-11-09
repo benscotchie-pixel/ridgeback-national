@@ -1,0 +1,59 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Swing Mocap</title>
+<style>
+  body { margin: 0; background: #111; color: #ddd; font: 14px system-ui, sans-serif; }
+  #log { padding: 8px 12px; white-space: pre-wrap; }
+  canvas { display: block; max-width: 100%; max-height: 90vh; }
+</style>
+<div id="log">loading…</div>
+<canvas id="cv"></canvas>
+<script type="module">
+// Dev tool: runs MediaPipe Pose Landmarker over extracted swing frames
+// (capture/<dir>/list.json, made by tools/video/frames.swift) and saves the landmarks
+// to capture/<dir>.json via the local mocap server.
+// Usage: tools/mocap.html?dir=frames_7133
+import { FilesetResolver, PoseLandmarker, DrawingUtils } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs';
+
+const dir = new URLSearchParams(location.search).get('dir');
+const log = (s) => (document.getElementById('log').textContent = s);
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+
+log('loading pose model…');
+const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+const pose = await PoseLandmarker.createFromOptions(vision, {
+  baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/latest/pose_landmarker_heavy.task' },
+  runningMode: 'VIDEO',
+  numPoses: 1,
+});
+const draw = new DrawingUtils(ctx);
+const round = (v) => Math.round(v * 10000) / 10000;
+const loadImg = (src) => new Promise((r, e) => { const im = new Image(); im.onload = () => r(im); im.onerror = e; im.src = src; });
+
+const names = await (await fetch(`../capture/${dir}/list.json`)).json();
+const frames = [];
+let w = 0, h = 0;
+for (const [i, n] of names.entries()) {
+  const im = await loadImg(`../capture/${dir}/${n}`);
+  if (!w) { w = cv.width = im.naturalWidth; h = cv.height = im.naturalHeight; }
+  ctx.drawImage(im, 0, 0);
+  const t = +n.match(/_([\d.]+)\.jpg$/)[1];
+  const res = pose.detectForVideo(cv, Math.round(t * 1000));
+  const lm = res.landmarks[0], wl = res.worldLandmarks[0];
+  frames.push(lm ? {
+    t,
+    img: lm.map((p) => [round(p.x), round(p.y), round(p.z), round(p.visibility)]),
+    world: wl.map((p) => [round(p.x), round(p.y), round(p.z)]),
+  } : { t });
+  if (lm) { draw.drawConnectors(lm, PoseLandmarker.POSE_CONNECTIONS, { color: '#00e5ff', lineWidth: 3 }); draw.drawLandmarks(lm, { color: '#ff3d00', radius: 3 }); }
+  // keep an overlay frame every 4th image for checking the tracking by eye
+  if (i % 4 === 0) await fetch(`/save/${dir}_ov${String(i).padStart(4, '0')}.jpg`, { method: 'POST', body: await new Promise((r) => cv.toBlob(r, 'image/jpeg', 0.8)) });
+  log(`${dir}: ${i + 1} / ${names.length}`);
+}
+
+const out = { dir, width: w, height: h, frames };
+await fetch('/save/' + dir + '.json', { method: 'POST', body: JSON.stringify(out) });
+window.mocapDone = { frames: frames.length, found: frames.filter((f) => f.img).length, width: w, height: h };
+log('done ' + JSON.stringify(window.mocapDone));
+</script>

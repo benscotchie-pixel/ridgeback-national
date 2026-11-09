@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="en">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta charset="utf-8">
+<title>Ridgeback National</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Layout: a resort golf site. Full-bleed photo heroes with the title set low-left, a slim bar
+     (menu · wordmark · book), editorial text blocks, numbered slideshows, and quiet utility pages.
+     Deliberately one light look, like the printed collateral of a club. */
+  :root {
+    color-scheme: light;
+    --lake: #23404a;        /* brand: deep lake blue-green */
+    --lake-2: #2f5561;
+    --paper: #f5f5f1;       /* page */
+    --white: #ffffff;
+    --ink: #1c2421;
+    --muted: #5f6b66;
+    --line: #d9ddd6;
+    --sand: #cdb98f;        /* accent, from the bunkers */
+    --sand-ink: #8a6f3c;
+    --display: 'Marcellus', 'Trajan Pro', Georgia, serif;
+    --body: 'Jost', 'Futura', 'Avenir Next', 'Helvetica Neue', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { background: var(--paper); color: var(--ink); font: 300 17px/1.65 var(--body); }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--lake); }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--sand); outline-offset: 3px; }
+  h1, h2, h3, h4 { font-family: var(--display); font-weight: 400; margin: 0; text-wrap: balance; letter-spacing: .01em; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+  .narrow { max-width: 820px; }
+  .label { font: 500 12px/1.2 var(--body); letter-spacing: .24em; text-transform: uppercase; color: var(--sand-ink); }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 14px 26px; border: 1px solid currentColor; background: transparent; cursor: pointer; text-decoration: none; font: 500 13px/1 var(--body); letter-spacing: .2em; text-transform: uppercase; transition: background .2s, color .2s; }
+  .btn.solid { background: var(--lake); color: var(--white); border-color: var(--lake); }
+  .btn.solid:hover { background: var(--lake-2); }
+  .btn.light { color: var(--white); }
+  .btn.light:hover { background: var(--white); color: var(--lake); }
+  .btn.ghost:hover { background: var(--lake); color: var(--white); border-color: var(--lake); }
+  .link { font: 500 13px/1 var(--body); letter-spacing: .2em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid var(--sand); padding-bottom: 6px; cursor: pointer; background: none; border-top: 0; border-left: 0; border-right: 0; }
+  .link:hover { color: var(--sand-ink); }
+
+  /* ---- top bar ---- */
+  .bar { position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0; z-index: 20; color: var(--white); transition: background .3s, box-shadow .3s; }
+  .bar.solid { background: var(--lake); box-shadow: 0 1px 0 rgba(0,0,0,.08); }
+  .bar .wrap { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 72px; }
+  .menu-btn { justify-self: start; display: inline-flex; align-items: center; gap: 12px; background: none; border: 0; cursor: pointer; font: 500 12px/1 var(--body); letter-spacing: .24em; text-transform: uppercase; padding: 10px 0; }
+  .menu-btn i { display: grid; gap: 5px; width: 26px; }
+  .menu-btn i::before, .menu-btn i::after, .menu-btn i span { content: ""; display: block; height: 1.5px; background: currentColor; }
+  .mark { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .mark svg { width: 30px; height: 30px; }
+  .mark b { font: 400 21px/1 var(--display); letter-spacing: .16em; text-transform: uppercase; white-space: nowrap; }
+  .bar .book { justify-self: end; padding: 12px 20px; }
+
+  /* full-screen menu */
+  .menu { position: fixed; inset: 0; z-index: 40; background: var(--lake); color: var(--white); display: grid; grid-template-rows: auto 1fr; overflow-y: auto; padding-top: env(safe-area-inset-top, 0px); }
+  .menu .wrap.top { display: flex; justify-content: space-between; align-items: center; height: 72px; }
+  .menu .close { background: none; border: 0; cursor: pointer; font: 500 12px/1 var(--body); letter-spacing: .24em; text-transform: uppercase; padding: 10px 0; }
+  .menu .body { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 40px; align-content: center; padding-block: 24px 48px; }
+  .menu nav { display: grid; gap: 4px; }
+  .menu nav a { font: 400 clamp(30px, 4.6vw, 52px)/1.15 var(--display); text-decoration: none; opacity: .92; }
+  .menu nav a:hover { color: var(--sand); }
+  .menu aside { display: grid; gap: 22px; align-content: start; border-left: 1px solid rgba(255,255,255,.2); padding-left: 32px; font-size: 16px; }
+  .menu aside .label { color: var(--sand); }
+  .menu aside p { margin: 6px 0 0; opacity: .85; }
+
+  /* ---- heroes ---- */
+  .hero { position: relative; height: clamp(520px, 80vh, 860px); color: var(--white); overflow: hidden; background: var(--lake); }
+  .hero.page { height: clamp(380px, 56vh, 600px); }
+  .hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,20,22,.45) 0%, rgba(10,20,22,0) 26%, rgba(10,20,22,0) 50%, rgba(10,20,22,.62) 100%); }
+  .hero .cap { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; }
+  .hero .cap .wrap { display: flex; align-items: end; justify-content: space-between; gap: 24px; padding-block: 0 44px; }
+  .hero h1 { font-size: clamp(42px, 7vw, 92px); line-height: 1; }
+  .hero .cap p { margin: 14px 0 0; font-size: clamp(16px, 1.6vw, 20px); font-weight: 400; letter-spacing: .04em; opacity: .95; }
+  .hero .cap .label { color: var(--sand); }
+  .scroll { flex-shrink: 0; width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(255,255,255,.8); display: grid; place-items: center; color: var(--white); text-decoration: none; background: rgba(255,255,255,.08); }
+
+  /* ---- generic sections ---- */
+  section { padding-block: clamp(64px, 9vw, 120px); }
+  section.tight { padding-block: clamp(48px, 6vw, 80px); }
+  .intro { display: grid; gap: 28px; }
+  .intro p.big { font: 400 clamp(22px, 2.6vw, 32px)/1.45 var(--display); margin: 0; color: var(--ink); }
+  .intro .acts { display: flex; gap: 28px; flex-wrap: wrap; align-items: center; }
+  .head { display: grid; gap: 14px; margin-bottom: 40px; }
+  .head h2 { font-size: clamp(32px, 4.4vw, 54px); line-height: 1.08; }
+  .head p { margin: 0; max-width: 62ch; color: var(--muted); }
+  .white { background: var(--white); }
+  .lakeband { background: var(--lake); color: var(--white); }
+  .lakeband .label { color: var(--sand); }
+
+  /* slideshow: big image + text panel with a 01 / 04 counter */
+  .show { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: clamp(28px, 4vw, 64px); align-items: center; }
+  .show .pic { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: var(--line); }
+  .show .pic img { width: 100%; height: 100%; object-fit: cover; transition: opacity .45s; }
+  .show .txt { display: grid; gap: 18px; align-content: center; min-width: 0; }
+  .show h3 { font-size: clamp(28px, 3.2vw, 42px); line-height: 1.1; }
+  .show p { margin: 0; color: var(--muted); }
+  .lakeband .show p { color: rgba(255,255,255,.8); }
+  .nav-row { display: flex; align-items: center; gap: 18px; margin-top: 8px; }
+  .count { font: 400 15px/1 var(--body); letter-spacing: .14em; font-variant-numeric: tabular-nums; }
+  .arrow { width: 46px; height: 46px; border-radius: 50%; border: 1px solid currentColor; background: none; cursor: pointer; display: grid; place-items: center; }
+  .arrow:hover { background: var(--lake); color: var(--white); border-color: var(--lake); }
+  .lakeband .arrow:hover { background: var(--white); color: var(--lake); border-color: var(--white); }
+
+  .facts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .facts div { padding: 26px 12px; text-align: center; border-right: 1px solid var(--line); }
+  .facts div:last-child { border-right: 0; }
+  .facts b { display: block; font: 400 clamp(28px, 3.4vw, 44px)/1 var(--display); font-variant-numeric: tabular-nums; }
+  .facts span { display: block; margin-top: 10px; font: 500 11px/1.3 var(--body); letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+
+  .feature { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 520px; }
+  .feature .pic img { width: 100%; height: 100%; object-fit: cover; }
+  .feature .txt { padding: clamp(36px, 6vw, 88px); display: grid; gap: 20px; align-content: center; }
+  .feature h2 { font-size: clamp(32px, 4vw, 50px); line-height: 1.08; }
+  .feature p { margin: 0; color: var(--muted); }
+  .feature dl { display: flex; gap: 32px; margin: 4px 0; }
+  .feature dt { font: 500 11px/1 var(--body); letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+  .feature dd { margin: 6px 0 0; font: 400 28px/1 var(--display); }
+
+  /* ---- course ---- */
+  .tees { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 36px; }
+  .tee { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; border: 1px solid var(--line); background: var(--white); cursor: pointer; font: 500 13px/1 var(--body); letter-spacing: .14em; text-transform: uppercase; }
+  .tee i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,.25); }
+  .tee[aria-pressed="true"] { border-color: var(--lake); background: var(--lake); color: var(--white); }
+  .tee small { font-weight: 400; letter-spacing: .06em; text-transform: none; opacity: .75; }
+  .holes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px 40px; }
+  .hole { display: grid; gap: 16px; min-width: 0; }
+  .hole .pic { aspect-ratio: 16 / 9; overflow: hidden; background: var(--line); }
+  .hole .pic img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s; }
+  .hole:hover .pic img { transform: scale(1.03); }
+  .hole .hd { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 12px; flex-wrap: wrap; }
+  .hole h3 { font-size: 30px; line-height: 1.1; }
+  .hole h3 small { display: block; font: 500 12px/1 var(--body); letter-spacing: .24em; text-transform: uppercase; color: var(--sand-ink); margin-bottom: 8px; }
+  .hole .stats { display: flex; gap: 22px; font-variant-numeric: tabular-nums; }
+  .hole .stats div { text-align: right; }
+  .hole .stats b { display: block; font: 400 22px/1 var(--display); }
+  .hole .stats span { font: 500 10px/1 var(--body); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+  .hole p { margin: 0; color: var(--muted); font-size: 16px; }
+
+  .card-wrap { overflow-x: auto; background: var(--white); border: 1px solid var(--line); }
+  table.sc { width: 100%; min-width: 980px; border-collapse: collapse; font: 400 14px/1 var(--body); font-variant-numeric: tabular-nums; text-align: center; }
+  table.sc th, table.sc td { padding: 11px 5px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
+  table.sc th:first-child, table.sc td:first-child { text-align: left; padding-left: 16px; white-space: nowrap; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; font-size: 12px; }
+  table.sc thead th { background: var(--lake); color: var(--white); font-weight: 500; }
+  table.sc .sum { background: #eef0eb; font-weight: 500; }
+  table.sc tr.par td { font-weight: 500; }
+  table.sc td .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: -1px; border: 1px solid rgba(0,0,0,.25); }
+  .ratings { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin-top: 28px; border: 1px solid var(--line); background: var(--white); }
+  .ratings div { padding: 18px 20px; border-right: 1px solid var(--line); }
+  .ratings div:last-child { border-right: 0; }
+  .ratings b { display: block; font: 400 22px/1.2 var(--display); }
+  .ratings span { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* ---- tee times ---- */
+  .booker { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+  .panel { background: var(--white); border: 1px solid var(--line); padding: clamp(18px, 3vw, 32px); min-width: 0; }
+  .days { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(74px, 1fr); gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+  .day { border: 1px solid var(--line); background: var(--paper); padding: 10px 6px; text-align: center; cursor: pointer; line-height: 1.2; }
+  .day small { display: block; font: 500 11px/1 var(--body); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+  .day b { display: block; font: 400 26px/1.1 var(--display); margin-top: 6px; }
+  .day[aria-pressed="true"] { background: var(--lake); border-color: var(--lake); color: var(--white); }
+  .day[aria-pressed="true"] small { color: var(--sand); }
+  .opts { display: flex; flex-wrap: wrap; gap: 18px 28px; margin: 22px 0; align-items: end; }
+  .opt { display: grid; gap: 8px; }
+  .opt > span { font: 500 11px/1 var(--body); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+  .seg { display: inline-flex; border: 1px solid var(--line); }
+  .seg button { border: 0; background: var(--white); padding: 9px 14px; cursor: pointer; font-weight: 400; border-right: 1px solid var(--line); }
+  .seg button:last-child { border-right: 0; }
+  .seg button[aria-pressed="true"] { background: var(--lake); color: var(--white); }
+  .slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 10px; }
+  .slot { border: 1px solid var(--line); background: var(--white); padding: 12px; cursor: pointer; text-align: left; display: grid; gap: 4px; }
+  .slot:hover:not(:disabled) { border-color: var(--lake); }
+  .slot b { font: 400 20px/1 var(--display); font-variant-numeric: tabular-nums; }
+  .slot span { font-size: 13px; color: var(--muted); }
+  .slot em { font-style: normal; font-size: 14px; font-weight: 500; color: var(--lake); }
+  .slot[aria-pressed="true"] { border-color: var(--lake); box-shadow: inset 0 0 0 1px var(--lake); background: #eef3f3; }
+  .slot:disabled { opacity: .4; cursor: not-allowed; }
+  .summary { display: grid; gap: 16px; position: sticky; top: 92px; }
+  .summary h3 { font-size: 28px; }
+  .summary dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 15px; }
+  .summary dt { color: var(--muted); }
+  .summary dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+  .summary .total { border-top: 1px solid var(--line); padding-top: 12px; display: flex; justify-content: space-between; font: 400 24px/1 var(--display); }
+  .note { font-size: 13px; color: var(--muted); margin: 0; }
+
+  form.f { display: grid; gap: 14px; }
+  .f .row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .f label { display: grid; gap: 6px; font: 500 11px/1 var(--body); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+  .f input, .f select, .f textarea { font: 400 16px/1.4 var(--body); color: var(--ink); text-transform: none; letter-spacing: 0; padding: 11px 12px; border: 1px solid var(--line); background: var(--white); border-radius: 0; }
+  .f textarea { min-height: 110px; resize: vertical; }
+  .f input:focus, .f select:focus, .f textarea:focus { outline: none; border-color: var(--lake); }
+  .done { border: 1px solid var(--lake); background: #eef3f3; padding: 22px; display: grid; gap: 8px; }
+  .done h4 { font-size: 24px; }
+  .done p { margin: 0; }
+
+  /* ---- rates / tables ---- */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--line); margin-bottom: 28px; overflow-x: auto; }
+  .tabs button { background: none; border: 0; padding: 14px 20px; cursor: pointer; font: 500 13px/1 var(--body); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; }
+  .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--lake); }
+  table.t { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  table.t th, table.t td { padding: 16px 12px; border-bottom: 1px solid var(--line); text-align: right; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  table.t th { font: 500 11px/1.2 var(--body); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+  table.t td { font-size: 17px; }
+  table.t td small { display: block; color: var(--muted); font-size: 14px; }
+  .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 3vw, 48px); }
+  .cols.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .col { display: grid; gap: 14px; align-content: start; min-width: 0; }
+  .col h3 { font-size: 28px; line-height: 1.15; }
+  .col p { margin: 0; color: var(--muted); }
+  ul.clean { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  ul.clean li { padding-left: 22px; position: relative; color: var(--muted); }
+  ul.clean li::before { content: ""; position: absolute; left: 0; top: .72em; width: 10px; height: 1px; background: var(--sand-ink); }
+  .price-list { display: grid; gap: 0; }
+  .price-list div { display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .price-list b { font-weight: 500; }
+  .price-list span { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* membership tiers */
+  .tiers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+  .tier { background: var(--white); border: 1px solid var(--line); padding: 28px 24px; display: grid; gap: 14px; align-content: start; }
+  .tier.pick { border-color: var(--lake); box-shadow: inset 0 3px 0 var(--lake); }
+  .tier h3 { font-size: 26px; }
+  .tier .price { font: 400 34px/1 var(--display); }
+  .tier .price small { font: 400 14px/1 var(--body); color: var(--muted); }
+  .tier p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  /* menu */
+  .menu-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 56px; }
+  .dish { padding: 18px 0; border-bottom: 1px solid var(--line); display: grid; gap: 4px; }
+  .dish div { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; }
+  .dish b { font: 400 21px/1.2 var(--display); }
+  .dish span { font-variant-numeric: tabular-nums; }
+  .dish p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 72px); align-items: center; }
+  .split .pic { aspect-ratio: 4 / 3; overflow: hidden; }
+  .split .pic img { width: 100%; height: 100%; object-fit: cover; }
+  .split .txt { display: grid; gap: 18px; min-width: 0; }
+  .split h2 { font-size: clamp(30px, 3.6vw, 46px); line-height: 1.1; }
+  .split p { margin: 0; color: var(--muted); }
+
+  /* ---- footer ---- */
+  footer { background: var(--lake); color: var(--white); padding-block: 64px 32px; }
+  footer .grid { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); gap: 36px; }
+  footer .label { color: var(--sand); margin-bottom: 14px; display: block; }
+  footer a { text-decoration: none; opacity: .85; display: block; padding: 4px 0; }
+  footer a:hover { opacity: 1; color: var(--sand); }
+  footer p { margin: 0 0 6px; opacity: .85; font-size: 15px; }
+  footer .fine { margin-top: 48px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.18); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 13px; opacity: .75; }
+
+  .mbook { display: none; }
+  [data-view] { display: none; }
+  [data-view].on { display: block; }
+
+  @media (max-width: 980px) {
+    .show, .feature, .booker, .split, .menu .body { grid-template-columns: minmax(0, 1fr); }
+    .feature .pic { aspect-ratio: 16 / 10; }
+    .tiers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cols { grid-template-columns: minmax(0, 1fr); }
+    .facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .facts div:nth-child(3) { border-right: 0; }
+    .facts div:nth-child(n+4) { border-top: 1px solid var(--line); }
+    footer .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .summary { position: static; }
+    .menu aside { border-left: 0; padding-left: 0; border-top: 1px solid rgba(255,255,255,.2); padding-top: 24px; }
+  }
+  @media (max-width: 680px) {
+    .bar .book { display: none; }
+    .mark b { font-size: 15px; letter-spacing: .12em; }
+    .mark svg { width: 24px; height: 24px; }
+    .bar .wrap { grid-template-columns: auto 1fr auto; gap: 12px; }
+    .menu-btn em { display: none; }
+    .holes, .menu-list, .cols.two, .f .row, .ratings { grid-template-columns: minmax(0, 1fr); }
+    .ratings div { border-right: 0; border-bottom: 1px solid var(--line); }
+    .tiers { grid-template-columns: minmax(0, 1fr); }
+    .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .facts div { border-right: 1px solid var(--line) !important; border-top: 1px solid var(--line); }
+    .facts div:nth-child(2n) { border-right: 0 !important; }
+    footer .grid { grid-template-columns: minmax(0, 1fr); }
+    .scroll { display: none; }
+    .mbook { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--lake); color: var(--white); text-align: center; text-decoration: none; padding: 16px max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); font: 500 13px/1 var(--body); letter-spacing: .22em; text-transform: uppercase; }
+    footer { padding-bottom: 96px; }
+  }
+</style>
+
+<header class="bar" id="bar">
+  <div class="wrap">
+    <button class="menu-btn" id="open-menu" aria-label="Open menu"><i><span></span></i><em>Menu</em></button>
+    <a class="mark" href="#home" aria-label="Ridgeback National home">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M7 27 Q14 17 20 21 T33 23 L33 27 Z" fill="currentColor"/><path d="M22 9 V21" stroke="currentColor" stroke-width="1.3"/><path d="M22 9 L29 11.5 L22 14 Z" fill="currentColor"/></svg>
+      <b>Ridgeback National</b>
+    </a>
+    <a class="btn light book" href="#teetimes">Book a Tee Time</a>
+  </div>
+</header>
+
+<div class="menu" id="menu" hidden>
+  <div class="wrap top">
+    <button class="close" id="close-menu">✕ Close</button>
+    <span></span>
+  </div>
+  <div class="wrap body">
+    <nav aria-label="Site">
+      <a href="#course">The Course</a>
+      <a href="#teetimes">Tee Times</a>
+      <a href="#rates">Rates &amp; Policies</a>
+      <a href="#membership">Membership</a>
+      <a href="#dining">Dining</a>
+      <a href="#events">Events &amp; Weddings</a>
+      <a href="#lessons">Lessons &amp; Practice</a>
+      <a href="#about">Our Story</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <aside>
+      <div><span class="label">Golf shop</span><p>(863) 555-0142<br>Open daily, 6:30 am – 7:00 pm</p></div>
+      <div><span class="label">Find us</span><p>4100 Ridgeback Trail<br>Lake Wales, Florida 33853</p></div>
+      <div><span class="label">Public play</span><p>Tee times open 30 days ahead.<br>Resort guests book 60 days ahead.</p></div>
+    </aside>
+  </div>
+</div>
+
+<main>
+<!-- =================== HOME =================== -->
+<div data-view="home">
+  <div class="hero">
+    <img src="photos/hero.jpg" alt="The third hole at Ridgeback National, a short par 3 played over a pond to a green guarded by bunkers and palms">
+    <div class="cap"><div class="wrap">
+      <div><div class="label">Lake Wales Ridge · Central Florida</div><h1>Ridgeback National</h1><p>Championship golf on Florida's oldest high ground.</p></div>
+      <a class="scroll" href="#welcome" aria-label="Scroll down">↓</a>
+    </div></div>
+  </div>
+
+  <section id="welcome"><div class="wrap narrow intro">
+    <div class="label">Welcome</div>
+    <p class="big">Ridgeback National is an 18-hole public course laid across the Lake Wales Ridge, the ancient sand spine that runs down the middle of Florida. Here the land rolls in a way the rest of the state doesn't, with live oaks and longleaf pine framing every hole and spring-fed ponds catching the evening light.</p>
+    <p style="margin:0;color:var(--muted)">Every round starts on a first tee 40 feet above the 18th green and ends on a porch overlooking it. In between are four par 5s you can reach, three short par 4s that reward thinking over power, and a set of par 3s played over water and down off the ridge. Four sets of tees make it a fair walk for every golfer, from a first-timer to a scratch player.</p>
+    <div class="acts"><a class="btn solid" href="#teetimes">Book a Tee Time</a><a class="link" href="#course">Explore the Course</a></div>
+  </div></section>
+
+  <section class="white tight"><div class="wrap">
+    <div class="facts">
+      <div><b>18</b><span>Holes</span></div>
+      <div><b>72</b><span>Par</span></div>
+      <div><b>6,947</b><span>Yards</span></div>
+      <div><b>73.8 / 134</b><span>Rating / Slope</span></div>
+      <div><b>4</b><span>Sets of tees</span></div>
+    </div>
+  </div></section>
+
+  <section><div class="wrap">
+    <div class="head"><div class="label">Golf</div><h2>Built for the game</h2></div>
+    <div class="show" data-show="golf"></div>
+  </div></section>
+
+  <div class="feature white">
+    <div class="pic"><img src="photos/hole12.jpg" alt="The 12th hole, a short par 3 across water to a small green"></div>
+    <div class="txt">
+      <div class="label">Signature hole</div>
+      <h2>No. 12 · Teacup</h2>
+      <p>The shortest hole on the course and the hardest to forget. A wedge played downhill across the pond to the smallest green on the property, with sand left and right and the wind swirling off the water. Hit it and you'll talk about it at the bar. Miss it and you'll talk about it longer.</p>
+      <dl><div><dt>Par</dt><dd>3</dd></div><div><dt>Yards</dt><dd>145</dd></div><div><dt>Handicap</dt><dd>14</dd></div></dl>
+      <div><a class="link" href="#course">See all 18 holes</a></div>
+    </div>
+  </div>
+
+  <section class="lakeband"><div class="wrap">
+    <div class="head"><div class="label">The clubhouse</div><h2>Stay for the nineteenth</h2></div>
+    <div class="show" data-show="club"></div>
+  </div></section>
+
+  <section><div class="wrap split">
+    <div class="pic"><img src="photos/teetimes.jpg" alt="The first tee looking down the opening fairway"></div>
+    <div class="txt">
+      <div class="label">Tee times</div>
+      <h2>Your round is waiting</h2>
+      <p>Public tee times open 30 days in advance, with twilight rates every afternoon after 2:00. Florida residents save year-round.</p>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center"><a class="btn solid" href="#teetimes">Book a Tee Time</a><a class="link" href="#rates">View rates</a></div>
+    </div>
+  </div></section>
+</div>
+
+<!-- =================== COURSE =================== -->
+<div data-view="course">
+  <div class="hero page">
+    <img src="photos/golf.jpg" alt="Aerial view of the 17th hole with water along the right side of the fairway">
+    <div class="cap"><div class="wrap"><div><div class="label">Golf</div><h1>The Course</h1><p>Par 72 · 6,947 yards · Four sets of tees</p></div></div></div>
+  </div>
+  <section><div class="wrap">
+    <div class="intro narrow" style="margin-bottom:56px">
+      <p class="big">The routing follows the ridge's natural rise and fall, so no two holes play in the same direction for long or from the same elevation.</p>
+      <p style="margin:0;color:var(--muted)">Fairways are wide where the land asks you to swing freely and tight where it asks you to think. Greens are firm, fast and tilted, rolling around 11 on the Stimpmeter most of the year. Choose your tees below to see each hole's yardage.</p>
+    </div>
+    <div class="tees" id="tees" role="group" aria-label="Choose tees"></div>
+    <div class="holes" id="holes"></div>
+  </div></section>
+  <section class="white" id="scorecard-sec"><div class="wrap">
+    <div class="head"><div class="label">Scorecard</div><h2>The card</h2><p>USGA Course Rating and Slope for each set of tees. Handicap ranks the holes from hardest (1) to easiest (18), with odd numbers on the front nine and even on the back.</p></div>
+    <div class="card-wrap"><table class="sc" id="sc"></table></div>
+    <div class="ratings" id="ratings"></div>
+  </div></section>
+</div>
+
+<!-- =================== TEE TIMES =================== -->
+<div data-view="teetimes">
+  <div class="hero page">
+    <img src="photos/teetimes.jpg" alt="The first tee at Ridgeback National">
+    <div class="cap"><div class="wrap"><div><div class="label">Golf</div><h1>Tee Times</h1><p>Book up to 30 days ahead. Twilight rates after 2:00 pm.</p></div></div></div>
+  </div>
+  <section><div class="wrap booker">
+    <div class="panel">
+      <div class="days" id="days" role="group" aria-label="Choose a date"></div>
+      <div class="opts">
+        <div class="opt"><span>Players</span><div class="seg" id="players"></div></div>
+        <div class="opt"><span>Holes</span><div class="seg" id="holes-n"></div></div>
+        <div class="opt"><span>Time of day</span><div class="seg" id="tod"></div></div>
+      </div>
+      <div class="slots" id="slots"></div>
+    </div>
+    <div class="panel summary" id="summary"></div>
+  </div></section>
+</div>
+
+<!-- =================== RATES =================== -->
+<div data-view="rates">
+  <div class="hero page">
+    <img src="photos/hole9.jpg" alt="The ninth hole, a long par 4 closing out the front nine">
+    <div class="cap"><div class="wrap"><div><div class="label">Golf</div><h1>Rates &amp; Policies</h1><p>Green fees include cart, range balls and GPS.</p></div></div></div>
+  </div>
+  <section><div class="wrap">
+    <div class="tabs" role="tablist" id="season-tabs"></div>
+    <table class="t" id="rate-table"></table>
+    <p class="note" style="margin-top:14px">Rates are per player, include cart and tax, and may vary on holidays and tournament days. Florida resident rates require a valid Florida ID at check-in.</p>
+  </div></section>
+  <section class="white"><div class="wrap cols">
+    <div class="col"><div class="label">Practice &amp; rentals</div><h3>Before the round</h3>
+      <div class="price-list">
+        <div><b>Range bucket, small</b><span>$10</span></div>
+        <div><b>Range bucket, large</b><span>$16</span></div>
+        <div><b>Premium rental clubs</b><span>$65</span></div>
+        <div><b>Push cart</b><span>$8</span></div>
+        <div><b>Walking caddie</b><span>$85 + gratuity</span></div>
+      </div>
+    </div>
+    <div class="col"><div class="label">On the course</div><h3>Course policies</h3>
+      <ul class="clean">
+        <li>Collared shirts and tailored shorts or slacks. No denim on the course.</li>
+        <li>Soft spikes only.</li>
+        <li>Pace of play is 4 hours and 15 minutes for 18 holes. Player assistants are on the course to help.</li>
+        <li>Carts stay on paths at all par 3s and within 30 yards of every green.</li>
+        <li>Walking is welcome at any time.</li>
+      </ul>
+    </div>
+    <div class="col"><div class="label">Booking</div><h3>Changes &amp; weather</h3>
+      <ul class="clean">
+        <li>Cancel or change up to 24 hours before your tee time at no charge.</li>
+        <li>Late cancellations and no-shows are charged the full green fee.</li>
+        <li>Rain checks are issued for play stopped by weather, prorated by holes completed.</li>
+        <li>Lightning detection is active: when the horn sounds, leave the course right away.</li>
+      </ul>
+    </div>
+  </div></section>
+</div>
+
+<!-- =================== MEMBERSHIP =================== -->
+<div data-view="membership">
+  <div class="hero page">
+    <img src="photos/membership.jpg" alt="Aerial view of the 14th hole climbing toward its green">
+    <div class="cap"><div class="wrap"><div><div class="label">Club</div><h1>Membership</h1><p>You belong here.</p></div></div></div>
+  </div>
+  <section><div class="wrap narrow intro">
+    <div class="label">Membership information</div>
+    <p class="big">Our members come from every corner of Central Florida and every walk of life. Some play five days a week. Some come for Friday dinner on The Porch and a Sunday nine with the kids. What they share is a love of the game and of the people they play it with.</p>
+    <p style="margin:0;color:var(--muted)">Ridgeback National is a privately owned club that welcomes public play, with a limited membership for golfers and families who want to call it home. Members enjoy privileges according to their membership type, including the golf course, practice facility, dining rooms and porch, social and family events, and the club's full calendar of leagues and tournaments.</p>
+    <div class="acts"><a class="btn solid" href="#member-form">Request membership information</a></div>
+  </div></section>
+
+  <section class="white"><div class="wrap">
+    <div class="head"><div class="label">Life at the club</div><h2>What members enjoy</h2></div>
+    <div class="cols">
+      <div class="col"><h3>The course</h3><p>Priority access to all 18 holes, a members-only window every weekend morning, and the course in its best condition every day of the year.</p></div>
+      <div class="col"><h3>Practice &amp; instruction</h3><p>The range, short-game area and putting course, plus member clinics and lessons with the Ridge Academy staff.</p></div>
+      <div class="col"><h3>Competition</h3><p>Weekly men's, women's and mixed leagues, the Club Championship, the Member-Guest and the season-ending Ridge Cup.</p></div>
+      <div class="col"><h3>Dining</h3><p>The Porch and Nineteen, member wine dinners, holiday brunches and a standing table for the Thursday night crowd.</p></div>
+      <div class="col"><h3>Family</h3><p>Junior Academy, summer camps, family nine-hole nights and a calendar of events built for every age.</p></div>
+      <div class="col"><h3>Social</h3><p>Opening Day, the Fourth of July cookout, Masters Sunday watch parties and the year-end gala on the Lakeside Lawn.</p></div>
+    </div>
+  </div></section>
+
+  <section id="member-form"><div class="wrap split" style="align-items:start">
+    <div class="txt">
+      <div class="label">Request information</div>
+      <h2>Start the conversation</h2>
+      <p>Tell us a little about yourself and what you're looking for. Our membership director will reach out personally to share membership options, answer questions and invite you out for a round and a tour.</p>
+      <p class="note">Membership is limited and offered by invitation following an introductory visit.</p>
+    </div>
+    <div class="panel" id="mstep"></div>
+  </div></section>
+</div>
+
+<!-- =================== DINING =================== -->
+<div data-view="dining">
+  <div class="hero page">
+    <img src="photos/dining.jpg" alt="The view from The Porch, looking back down the 18th hole from behind the green">
+    <div class="cap"><div class="wrap"><div><div class="label">Dining</div><h1>The Porch</h1><p>Overlooking the 18th green. Open to everyone, golfer or not.</p></div></div></div>
+  </div>
+  <section><div class="wrap">
+    <div class="cols" style="margin-bottom:64px">
+      <div class="col"><div class="label">The Porch</div><h3>Restaurant &amp; bar</h3><p>Old Florida cooking with a view of the closing hole: Gulf seafood, local citrus and produce from farms along the ridge. Sit inside under the fans or out on the porch as the last groups come up 18.</p><p><b style="font-weight:500;color:var(--ink)">Daily</b> 7:00 am – 9:00 pm<br><b style="font-weight:500;color:var(--ink)">Happy hour</b> Mon–Fri, 3:00 – 6:00 pm</p></div>
+      <div class="col"><div class="label">The Turn</div><h3>Halfway house</h3><p>Between the 9th green and the 10th tee: hot dogs, cold drinks, fresh-squeezed orange juice and the best egg-salad sandwich in Polk County. In and out in under five minutes.</p><p><b style="font-weight:500;color:var(--ink)">Daily</b> 7:30 am – 4:00 pm</p></div>
+      <div class="col"><div class="label">Nineteen</div><h3>The bar</h3><p>Florida craft beer on tap, a short list of good bourbon, and a frozen key lime margarita that started as a joke and stayed on the menu. Every TV shows golf.</p><p><b style="font-weight:500;color:var(--ink)">Daily</b> 11:00 am – close</p></div>
+    </div>
+    <div class="tabs" role="tablist" id="menu-tabs"></div>
+    <div class="menu-list" id="menu-list"></div>
+  </div></section>
+</div>
+
+<!-- =================== EVENTS =================== -->
+<div data-view="events">
+  <div class="hero page">
+    <img src="photos/events.jpg" alt="The seventh green beside a pond in late-afternoon light">
+    <div class="cap"><div class="wrap"><div><div class="label">Club</div><h1>Events &amp; Weddings</h1><p>Tournaments, celebrations and everything in between.</p></div></div></div>
+  </div>
+  <section><div class="wrap cols">
+    <div class="col"><div class="label">Golf events</div><h3>Tournaments &amp; outings</h3><p>Charity scrambles, corporate outings and member-guests for 16 to 144 players, with shotgun or tee-time starts. Our events team handles the pairings, scoring, signage, contests and the cart staging.</p>
+      <div class="price-list"><div><b>Outing package</b><span>from $119 / player</span></div><div><b>Shotgun start</b><span>72–144 players</span></div><div><b>Awards reception</b><span>The Porch or the Lawn</span></div></div></div>
+    <div class="col"><div class="label">Private events</div><h3>Rooms &amp; spaces</h3><p>Rehearsal dinners, birthdays, retirements and company dinners, catered by The Porch kitchen.</p>
+      <div class="price-list"><div><b>The Porch Room</b><span>up to 120 seated</span></div><div><b>Lakeside Lawn</b><span>up to 250 standing</span></div><div><b>The Locker Room Bar</b><span>up to 40</span></div></div></div>
+    <div class="col"><div class="label">Plan with us</div><h3>Tell us about your event</h3>
+      <form class="f" data-form="events">
+        <label>Name<input id="e-name" required autocomplete="name"></label>
+        <label>Email<input id="e-email" type="email" required autocomplete="email"></label>
+        <div class="row"><label>Event type<select id="e-type"><option>Golf outing</option><option>Wedding</option><option>Private dinner</option><option>Other</option></select></label><label>Guests<input id="e-guests" type="number" min="1" inputmode="numeric"></label></div>
+        <label>Preferred date<input id="e-date" type="date"></label>
+        <button class="btn solid" type="submit">Send inquiry</button>
+      </form>
+    </div>
+  </div></section>
+  <section class="white"><div class="wrap split">
+    <div class="pic"><img src="photos/weddings.jpg" alt="Palms and a still pond beside the third green"></div>
+    <div class="txt">
+      <div class="label">Weddings</div>
+      <h2>Say yes on the ridge</h2>
+      <p>Exchange vows on the Lakeside Lawn under the palms beside the 3rd green, with the pond behind you and the sun going down over the pines. Then move up to The Porch for dinner and dancing.</p>
+      <ul class="clean"><li>Ceremony and reception for up to 200 guests</li><li>Golf-cart sunset photos on the course after the last tee time</li><li>A dedicated wedding coordinator from first tour to last dance</li></ul>
+      <div><button class="link" data-goto="events-form">Schedule a tour</button></div>
+    </div>
+  </div></section>
+</div>
+
+<!-- =================== LESSONS =================== -->
+<div data-view="lessons">
+  <div class="hero page">
+    <img src="photos/lessons.jpg" alt="Looking down the 10th fairway from the tee">
+    <div class="cap"><div class="wrap"><div><div class="label">Golf</div><h1>Lessons &amp; Practice</h1><p>The Ridge Academy and a full practice facility.</p></div></div></div>
+  </div>
+  <section><div class="wrap cols">
+    <div class="col"><div class="label">Practice facility</div><h3>Room to work</h3><ul class="clean"><li>Grass driving range with 32 hitting stations and target greens out to 250 yards</li><li>Short-game area with three greens, bunkers and chipping from every lie</li><li>18-hole putting course beside the first tee</li><li>Covered teaching bay with launch-monitor analysis</li></ul></div>
+    <div class="col"><div class="label">Instruction</div><h3>Private lessons</h3>
+      <div class="price-list"><div><b>Private lesson, 60 min</b><span>$150</span></div><div><b>Private lesson, 30 min</b><span>$85</span></div><div><b>Series of five, 60 min</b><span>$650</span></div><div><b>Playing lesson, 9 holes</b><span>$275</span></div><div><b>Club fitting</b><span>$125</span></div></div></div>
+    <div class="col"><div class="label">Groups</div><h3>Clinics &amp; juniors</h3>
+      <div class="price-list"><div><b>Short Game Saturdays</b><span>Sat 9:00 · $45</span></div><div><b>Beginner Basics, 4 weeks</b><span>Tue 6:00 pm · $160</span></div><div><b>Ladies' Nine &amp; Wine</b><span>Thu 4:30 pm · $55</span></div><div><b>Junior Academy, ages 7–17</b><span>Wed 4:00 pm · $35</span></div><div><b>Summer Junior Camp</b><span>June–July · $325 / week</span></div></div></div>
+  </div></section>
+</div>
+
+<!-- =================== ABOUT =================== -->
+<div data-view="about">
+  <div class="hero page">
+    <img src="photos/about.jpg" alt="High aerial view of the second hole bending through the forest">
+    <div class="cap"><div class="wrap"><div><div class="label">Our story</div><h1>Old ground, new course</h1></div></div></div>
+  </div>
+  <section><div class="wrap narrow intro">
+    <p class="big">A million years ago the Lake Wales Ridge was a chain of islands in a shallow sea. Today it is some of the highest, sandiest and best-draining ground in Florida, which is exactly what you want under a golf course.</p>
+    <p style="margin:0;color:var(--muted)">The property spent most of the last century as a cattle ranch and citrus grove. When the grove came out, the owners walked the land with a simple idea: build a course that anyone can play, that feels like it has always been here. Fairways were laid where the sand already wanted them, the ponds were dug where water already collected, and nearly every live oak on the property was kept.</p>
+    <p style="margin:0;color:var(--muted)">The course opened in 2026 as a public course with no initiation fee and no gate. Its four sets of tees run from 4,940 to 6,947 yards, so a family can play together on the same afternoon.</p>
+  </div></section>
+  <section class="white"><div class="wrap cols">
+    <div class="col"><div class="label">The land</div><h3>Ridge sand</h3><p>Deep, sugar-white sand drains fast after a summer storm, so the course rarely closes for rain and fairways stay firm enough to bounce a ball onto the green.</p></div>
+    <div class="col"><div class="label">The design</div><h3>Width and angles</h3><p>Wide fairways with the trouble on one side reward the golfer who picks the right line, not just the longest one. Most greens are open in front for anyone who wants to run the ball on.</p></div>
+    <div class="col"><div class="label">Stewardship</div><h3>Kept wild</h3><p>More than 300 acres of scrub and pine flatwoods stay untouched around the course, home to gopher tortoises, scrub jays and the occasional bobcat on the 14th.</p></div>
+  </div></section>
+</div>
+
+<!-- =================== CONTACT =================== -->
+<div data-view="contact">
+  <div class="hero page">
+    <img src="photos/contact.jpg" alt="The 16th hole, a long par 3, seen from the tee">
+    <div class="cap"><div class="wrap"><div><div class="label">Visit</div><h1>Contact &amp; Directions</h1></div></div></div>
+  </div>
+  <section><div class="wrap split" style="align-items:start">
+    <div class="txt">
+      <div class="cols two" style="gap:28px">
+        <div class="col"><div class="label">Address</div><p style="color:var(--ink)">4100 Ridgeback Trail<br>Lake Wales, Florida 33853</p></div>
+        <div class="col"><div class="label">Golf shop</div><p style="color:var(--ink)">(863) 555-0142<br>golf@ridgebacknational.example</p></div>
+        <div class="col"><div class="label">Hours</div><p style="color:var(--ink)">Golf shop: 6:30 am – 7:00 pm<br>First tee time: 7:00 am</p></div>
+        <div class="col"><div class="label">Events</div><p style="color:var(--ink)">(863) 555-0157<br>events@ridgebacknational.example</p></div>
+      </div>
+      <div class="label" style="margin-top:20px">Getting here</div>
+      <ul class="clean">
+        <li>From Orlando: about one hour south on US-27.</li>
+        <li>From Tampa: about 75 minutes east on I-4, then south on US-27.</li>
+        <li>Nearest airports: Orlando International (MCO, 60 miles) and Lakeland Linder (LAL, 35 miles).</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3 style="font-size:28px;margin-bottom:16px">Send us a message</h3>
+      <form class="f" data-form="contact">
+        <div class="row"><label>Name<input id="c-name" required autocomplete="name"></label><label>Email<input id="c-email" type="email" required autocomplete="email"></label></div>
+        <label>Subject<select id="c-subject"><option>General question</option><option>Tee times</option><option>Lessons</option><option>Lost and found</option></select></label>
+        <label>Message<textarea id="c-msg" required></textarea></label>
+        <button class="btn solid" type="submit">Send message</button>
+      </form>
+    </div>
+  </div></section>
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="grid">
+      <div>
+        <a class="mark" href="#home" style="opacity:1;margin-bottom:18px"><svg viewBox="0 0 40 40" aria-hidden="true" style="width:30px;height:30px"><circle cx="20" cy="20" r="18.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M7 27 Q14 17 20 21 T33 23 L33 27 Z" fill="currentColor"/><path d="M22 9 V21" stroke="currentColor" stroke-width="1.3"/><path d="M22 9 L29 11.5 L22 14 Z" fill="currentColor"/></svg><b>Ridgeback National</b></a>
+        <p>4100 Ridgeback Trail<br>Lake Wales, Florida 33853</p>
+        <p>(863) 555-0142</p>
+      </div>
+      <div><span class="label">Golf</span><a href="#course">The Course</a><a href="#teetimes">Tee Times</a><a href="#rates">Rates &amp; Policies</a><a href="#lessons">Lessons &amp; Practice</a></div>
+      <div><span class="label">Club</span><a href="#membership">Membership</a><a href="#dining">Dining</a><a href="#events">Events &amp; Weddings</a><a href="#about">Our Story</a></div>
+      <div><span class="label">Visit</span><a href="#contact">Contact &amp; Directions</a><p style="margin-top:6px">Open daily<br>6:30 am – 7:00 pm</p></div>
+    </div>
+    <div class="fine"><span>© 2026 Ridgeback National</span><span>Ridgeback National is a fictional golf course created for a class project.</span></div>
+  </div>
+</footer>
+<a class="mbook" href="#teetimes">Book a Tee Time</a>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+  // ---------- data ----------
+  const HOLES = [
+    ['Welcome', 4, 'A gentle opener that drifts right. Favor the right half of the fairway to stay clear of the bunker at 235, then aim for the middle of a green pinched by sand short and right.'],
+    ['Heron Pond', 5, 'Bends right, then right again. Long hitters can get home in two, but the pond left of the second landing area catches a pulled fairway wood.'],
+    ['The Drop', 3, 'Plays well downhill over a pond to a green set between two bunkers. Take one less club and commit to it.'],
+    ['Elbow', 4, 'A right-angle dogleg that climbs to the green. A stand of oaks guards the inside corner; cutting it shortens the approach but brings the trees into play.'],
+    ['Creekside', 4, 'Water runs down the right side of the tee shot, and the green is one of the smallest on the course.'],
+    ['Cathedral', 3, 'The biggest drop on the property, down into a green ringed by three bunkers. Club selection is everything.'],
+    ['Long Walk', 5, 'A three-shotter for most. The second shot decides the hole: lay up short of the pond that sits short and right of the green, or carry it and putt for eagle.'],
+    ['Needle', 4, 'Short, but only 28 yards wide, climbing to a green guarded by four bunkers. Position beats power here.'],
+    ['The Turn', 4, 'A long par 4 that closes the front nine, with water waiting left of the second shot. Bogey is not a bad score.'],
+    ['Twin Gates', 4, 'Straightaway, with paired bunkers framing both the landing area and the green.'],
+    ['Pond Corner', 4, 'Doglegs left around a stand of trees. A pond sits on the outside of the elbow for anyone who hits it straight through.'],
+    ['Teacup', 3, 'The shortest hole and the smallest green, played downhill across the water. The wind decides this one.'],
+    ['Temptation', 5, 'Reachable in two, and four bunkers sit exactly where a greedy second shot wants to land.'],
+    ['Summit', 4, 'The longest par 4, climbing all the way to a large green. Usually the hardest hole on the card.'],
+    ['Short Fuse', 4, 'A short par 4 running downhill. Water sits right of the green, so the layup is the smart play.'],
+    ['Long Iron', 3, 'A long par 3 with bunkers left, right and behind, and water lurking right.'],
+    ['Marathon', 5, 'The longest hole on the course. Water runs down the right side of the approach the whole way in.'],
+    ['Clubhouse', 4, 'An uphill finisher with water left off the tee and a green guarded on both sides, played straight up to The Porch.'],
+  ];
+  const HCP = [13, 5, 15, 11, 1, 17, 3, 9, 7, 12, 10, 14, 8, 4, 16, 18, 2, 6];
+  const TEES = [
+    { key: 'ridge', name: 'Ridge', color: '#1f2a2c', yds: [391,540,165,425,361,206,571,348,443,410,389,145,525,451,333,215,585,444], rating: 'Men 73.8 / 134' },
+    { key: 'pine', name: 'Pine', color: '#2f6a8a', yds: [356,491,150,387,328,187,520,317,403,373,354,132,478,411,303,196,532,404], rating: 'Men 70.9 / 128' },
+    { key: 'oak', name: 'Oak', color: '#ffffff', yds: [321,442,135,348,296,169,468,285,363,336,319,119,431,370,273,176,479,364], rating: 'Men 68.1 / 121 · Women 73.6 / 131' },
+    { key: 'palmetto', name: 'Palmetto', color: '#c8a447', yds: [278,383,119,302,256,148,406,247,314,291,276,104,373,320,237,155,415,316], rating: 'Men 64.9 / 113 · Women 69.6 / 121' },
+  ];
+  const sum = (a, i, j) => a.slice(i, j).reduce((s, x) => s + x, 0);
+
+  const SHOWS = {
+    golf: [
+      { img: 'photos/golf.jpg', alt: 'Aerial view of the 17th hole', label: 'The Course', title: 'Eighteen holes on the ridge', text: 'A par 72 that rises and falls across the highest ground in Central Florida, with four reachable par 5s, three short par 4s and par 3s played over water.', href: '#course', cta: 'Explore the course' },
+      { img: 'photos/lessons.jpg', alt: 'The 10th fairway from the tee', label: 'Practice & Academy', title: 'Practice like you play', text: 'A grass range with 32 stations, a three-green short-game area and an 18-hole putting course, plus private lessons and clinics from the Ridge Academy staff.', href: '#lessons', cta: 'Lessons & practice' },
+      { img: 'photos/teetimes.jpg', alt: 'The first tee', label: 'Tee Times', title: 'Open to everyone', text: 'Public tee times every day from 7:00 am, booked up to 30 days ahead. Twilight rates start at 2:00 pm and Florida residents save year-round.', href: '#teetimes', cta: 'Book a tee time' },
+    ],
+    club: [
+      { img: 'photos/dining.jpg', alt: 'The 18th green from The Porch', label: 'Dining', title: 'The Porch', text: 'Old Florida cooking and cold drinks on a wraparound porch above the 18th green. Open to everyone, every day.', href: '#dining', cta: 'See the menu' },
+      { img: 'photos/events.jpg', alt: 'The seventh green beside the pond', label: 'Events', title: 'Outings & celebrations', text: 'Charity scrambles, company outings and private dinners for 16 to 250 guests, planned and run by our events team.', href: '#events', cta: 'Plan an event' },
+      { img: 'photos/weddings.jpg', alt: 'Palms beside the pond on the third hole', label: 'Weddings', title: 'Vows by the water', text: 'Ceremonies on the Lakeside Lawn beside the 3rd green, with the reception up on The Porch as the sun goes down.', href: '#events', cta: 'Weddings' },
+      { img: 'photos/membership.jpg', alt: 'Aerial view of the 14th hole', label: 'Membership', title: 'Make it your home course', text: 'A limited membership for golfers and families who want to call Ridgeback home, with priority tee times, leagues and a full social calendar.', href: '#membership', cta: 'Membership information' },
+    ],
+  };
+
+  // ---------- router ----------
+  const VIEWS = $$('[data-view]').map((v) => v.dataset.view);
+  function route() {
+    const id = location.hash.slice(1);
+    const view = VIEWS.includes(id) ? id : (id === 'member-form' ? 'membership' : 'home');
+    $$('[data-view]').forEach((v) => v.classList.toggle('on', v.dataset.view === view));
+    $('#menu').hidden = true;
+    document.body.style.overflow = '';
+    if (id === 'welcome' || id === 'member-form') document.getElementById(id).scrollIntoView();
+    else window.scrollTo({ top: 0, behavior: 'auto' });
+    onScroll();
+  }
+  window.addEventListener('hashchange', route);
+
+  // solid bar after the hero
+  function onScroll() { $('#bar').classList.toggle('solid', window.scrollY > 60); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  $('#open-menu').addEventListener('click', () => { $('#menu').hidden = false; document.body.style.overflow = 'hidden'; $('#close-menu').focus(); });
+  $('#close-menu').addEventListener('click', () => { $('#menu').hidden = true; document.body.style.overflow = ''; });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#menu').hidden) $('#close-menu').click(); });
+
+  // ---------- slideshows ----------
+  $$('[data-show]').forEach((el) => {
+    const slides = SHOWS[el.dataset.show];
+    let i = 0;
+    el.innerHTML = `<div class="pic"><img alt=""></div><div class="txt"><div class="label"></div><h3></h3><p></p>
+      <div><a class="link" href="#"></a></div>
+      <div class="nav-row"><button class="arrow" data-d="-1" aria-label="Previous">←</button><span class="count"></span><button class="arrow" data-d="1" aria-label="Next">→</button></div></div>`;
+    const img = $('img', el);
+    const draw = () => {
+      const s = slides[i];
+      img.style.opacity = 0;
+      setTimeout(() => { img.src = s.img; img.alt = s.alt; img.style.opacity = 1; }, img.src ? 180 : 0);
+      $('.label', el).textContent = s.label;
+      $('h3', el).textContent = s.title;
+      $('p', el).textContent = s.text;
+      const a = $('.link', el); a.textContent = s.cta; a.href = s.href;
+      $('.count', el).textContent = `${String(i + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+    };
+    $$('.arrow', el).forEach((b) => b.addEventListener('click', () => { i = (i + +b.dataset.d + slides.length) % slides.length; draw(); }));
+    draw();
+  });
+
+  // ---------- course ----------
+  let tee = 0;
+  function renderTees() {
+    $('#tees').innerHTML = TEES.map((t, k) => `<button class="tee" aria-pressed="${k === tee}" data-k="${k}"><i style="background:${t.color}"></i>${t.name} <small>${sum(t.yds, 0, 18).toLocaleString()} yds</small></button>`).join('');
+  }
+  function renderHoles() {
+    const t = TEES[tee];
+    $('#holes').innerHTML = HOLES.map(([name, par, text], k) => `
+      <article class="hole">
+        <div class="pic"><img src="photos/hole${k + 1}.jpg" alt="Hole ${k + 1}, ${name}" loading="lazy"></div>
+        <div class="hd"><h3><small>Hole ${k + 1}</small>${name}</h3>
+          <div class="stats"><div><b>${par}</b><span>Par</span></div><div><b>${t.yds[k]}</b><span>Yards</span></div><div><b>${HCP[k]}</b><span>Hcp</span></div></div></div>
+        <p>${text}</p>
+      </article>`).join('');
+  }
+  function renderCard() {
+    const pars = HOLES.map((h) => h[1]);
+    const cells = (arr, tot) => {
+      const c = [...arr.slice(0, 9), tot ? sum(arr, 0, 9) : '', ...arr.slice(9), tot ? sum(arr, 9, 18) : '', tot ? sum(arr, 0, 18) : ''];
+      return c.map((v, i) => `<td class="${[9, 19, 20].includes(i) ? 'sum' : ''}">${typeof v === 'number' ? v.toLocaleString() : v}</td>`).join('');
+    };
+    const head = [...Array(9)].map((_, i) => `<th>${i + 1}</th>`).join('') + '<th>Out</th>' + [...Array(9)].map((_, i) => `<th>${i + 10}</th>`).join('') + '<th>In</th><th>Total</th>';
+    $('#sc').innerHTML = `<thead><tr><th>Hole</th>${head}</tr></thead><tbody>
+      ${TEES.map((t) => `<tr><td><span class="dot" style="background:${t.color}"></span>${t.name}</td>${cells(t.yds, true)}</tr>`).join('')}
+      <tr class="par"><td>Par</td>${cells(pars, true)}</tr>
+      <tr><td>Handicap</td>${cells(HCP, false)}</tr></tbody>`;
+    $('#ratings').innerHTML = TEES.map((t) => `<div><b><span class="dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid rgba(0,0,0,.25);margin-right:8px;background:${t.color}"></span>${t.name}</b><span>${sum(t.yds, 0, 18).toLocaleString()} yds · ${t.rating}</span></div>`).join('');
+  }
+  $('#tees').addEventListener('click', (e) => { const b = e.target.closest('[data-k]'); if (!b) return; tee = +b.dataset.k; renderTees(); renderHoles(); });
+
+  // ---------- rates ----------
+  const SEASONS = [
+    { name: 'Peak', dates: 'Dec 15 – Apr 30', base: 149, twi: 99, res: 119, jr: 45, nine: 89 },
+    { name: 'Summer', dates: 'May 1 – Sep 30', base: 85, twi: 55, res: 65, jr: 25, nine: 49 },
+    { name: 'Fall', dates: 'Oct 1 – Dec 14', base: 115, twi: 75, res: 89, jr: 35, nine: 69 },
+  ];
+  const seasonFor = (d) => { const m = d.getMonth() + 1, day = d.getDate(); if (m <= 4 || (m === 12 && day >= 15)) return SEASONS[0]; if (m <= 9) return SEASONS[1]; return SEASONS[2]; };
+  let season = SEASONS.indexOf(seasonFor(new Date()));
+  function renderRates() {
+    $('#season-tabs').innerHTML = SEASONS.map((s, k) => `<button role="tab" aria-selected="${k === season}" data-k="${k}">${s.name} · ${s.dates}</button>`).join('');
+    const s = SEASONS[season];
+    const rows = [
+      ['18 holes', 'Daily, before 2:00 pm', s.base, s.base + 10],
+      ['Twilight', 'Daily, after 2:00 pm', s.twi, s.twi],
+      ['Florida resident', '18 holes, any time', s.res, s.res + 10],
+      ['9 holes', 'Front or back nine', s.nine, s.nine],
+      ['Junior', '17 and under, with a paying adult', s.jr, s.jr],
+    ];
+    $('#rate-table').innerHTML = `<thead><tr><th>Rate</th><th>Monday – Thursday</th><th>Friday – Sunday</th></tr></thead><tbody>` +
+      rows.map(([a, b, wd, we]) => `<tr><td>${a}<small>${b}</small></td><td>$${wd}</td><td>$${we}</td></tr>`).join('') + '</tbody>';
+  }
+  $('#season-tabs').addEventListener('click', (e) => { const b = e.target.closest('[data-k]'); if (b) { season = +b.dataset.k; renderRates(); } });
+
+  // ---------- membership request (three steps) ----------
+  const ms = { step: 0, data: {} };
+  const MSTEPS = ['About you', 'Your interests', 'Review'];
+  function renderMember() {
+    const el = $('#mstep');
+    const steps = `<div class="label" style="margin-bottom:14px">Step ${ms.step + 1} of 3 · ${MSTEPS[ms.step]}</div>`;
+    const v = (k) => (ms.data[k] ?? '').replace(/"/g, '&quot;');
+    if (ms.step === 0) {
+      el.innerHTML = steps + `<form class="f" id="mf"><div class="row"><label>First name<input id="m-first" name="first" required autocomplete="given-name" value="${v('first')}"></label><label>Last name<input id="m-last" name="last" required autocomplete="family-name" value="${v('last')}"></label></div>
+        <div class="row"><label>Email<input id="m-email" name="email" type="email" required autocomplete="email" value="${v('email')}"></label><label>Phone<input id="m-phone" name="phone" type="tel" autocomplete="tel" value="${v('phone')}"></label></div>
+        <label>City<input id="m-city" name="city" autocomplete="address-level2" value="${v('city')}"></label>
+        <button class="btn solid" type="submit">Continue</button></form>`;
+    } else if (ms.step === 1) {
+      const opts = ['Golf', 'Dining & social', 'Family & junior programs', 'Leagues & tournaments', 'Corporate'];
+      el.innerHTML = steps + `<form class="f" id="mf">
+        <label>Which best describes you?<select id="m-type" name="type">${['Individual', 'Couple', 'Family', 'Corporate'].map((o) => `<option ${ms.data.type === o ? 'selected' : ''}>${o}</option>`).join('')}</select></label>
+        <div style="display:grid;gap:8px"><span style="font:500 11px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)">Interested in</span>
+          ${opts.map((o, i) => `<label style="display:flex;gap:10px;align-items:center;text-transform:none;letter-spacing:0;font:400 16px/1.3 var(--body);color:var(--ink)"><input type="checkbox" id="m-int${i}" name="int" value="${o}" ${(ms.data.int || []).includes(o) ? 'checked' : ''}> ${o}</label>`).join('')}</div>
+        <div class="row"><label>Handicap (if any)<input id="m-hcp" name="hcp" inputmode="decimal" value="${v('hcp')}"></label><label>How did you hear about us?<select id="m-src" name="src">${['Played the course', 'A member', 'Event or wedding', 'Online', 'Other'].map((o) => `<option ${ms.data.src === o ? 'selected' : ''}>${o}</option>`).join('')}</select></label></div>
+        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><button class="btn solid" type="submit">Continue</button><button class="link" type="button" id="mback">Back</button></div></form>`;
+    } else if (ms.step === 2) {
+      const d = ms.data;
+      el.innerHTML = steps + `<dl class="summary" style="position:static;gap:0"><dl style="margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 16px">
+        <dt>Name</dt><dd>${d.first} ${d.last}</dd><dt>Email</dt><dd>${d.email}</dd>${d.phone ? `<dt>Phone</dt><dd>${d.phone}</dd>` : ''}
+        <dt>Membership</dt><dd>${d.type}</dd><dt>Interests</dt><dd>${(d.int || []).join(', ') || 'Not specified'}</dd></dl></dl>
+        <form class="f" id="mf" style="margin-top:18px"><label>Anything else we should know?<textarea id="m-note" name="note">${v('note')}</textarea></label>
+        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><button class="btn solid" type="submit">Request information</button><button class="link" type="button" id="mback">Back</button></div></form>`;
+    } else {
+      el.innerHTML = `<div class="done"><h4>Thank you, ${ms.data.first}</h4><p>Our membership director will contact you within two business days to arrange a visit.</p><p class="note">This is a demonstration website, so your request wasn't actually sent.</p></div>`;
+      return;
+    }
+    $('#mback')?.addEventListener('click', () => { ms.step--; renderMember(); });
+    $('#mf').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      for (const [k, val] of fd.entries()) if (k !== 'int') ms.data[k] = val;
+      if (ms.step === 1) ms.data.int = fd.getAll('int');
+      ms.step++;
+      renderMember();
+    });
+  }
+
+  // ---------- dining menu ----------
+  const MENU = {
+    Breakfast: [['Ridge Breakfast', '13', 'Two eggs any style, grits, bacon or sausage, and a buttermilk biscuit'], ['Shrimp & Grits', '17', 'Gulf shrimp, stone-ground grits, tasso gravy'], ['Orange Grove Pancakes', '12', 'Citrus butter, local honey'], ['Breakfast Cuban', '11', 'Ham, egg, Swiss and mustard pressed on Cuban bread'], ['Avocado Toast', '12', 'Sourdough, chili crunch, soft egg'], ['Fresh-Squeezed OJ', '6', 'From the grove down the road']],
+    Lunch: [['Blackened Grouper Sandwich', '21', 'Lettuce, tomato, key lime tartar, brioche'], ['The Turn Burger', '17', 'Double smash patty, American cheese, pickles, Porch sauce'], ['Cuban Sandwich', '15', 'Mojo pork, ham, Swiss, pickles, mustard'], ['Citrus & Avocado Salad', '14', 'Local greens, grapefruit, orange, toasted pecans'], ['Smoked Fish Dip', '13', 'Saltines, pickled jalapeños, lemon'], ['Fried Green Tomatoes', '11', 'Pimento cheese, pepper jelly']],
+    Dinner: [['Seared Gulf Snapper', '34', 'Coconut rice, mango salsa, lime beurre blanc'], ['Bone-In Pork Chop', '32', 'Sweet-potato mash, collards, bourbon glaze'], ['Ribeye, 14 oz', '46', 'Hand-cut fries, chimichurri'], ['Low Country Boil', '29', 'Shrimp, sausage, corn, potatoes, Old Bay butter'], ['Half Chicken', '26', 'Mojo-marinated, black beans, plantains'], ['Key Lime Pie', '10', 'Graham crust, whipped cream, lime zest']],
+  };
+  let meal = 'Lunch';
+  function renderMenu() {
+    $('#menu-tabs').innerHTML = Object.keys(MENU).map((m) => `<button role="tab" aria-selected="${m === meal}" data-m="${m}">${m}</button>`).join('');
+    $('#menu-list').innerHTML = MENU[meal].map(([n, p, d]) => `<div class="dish"><div><b>${n}</b><span>$${p}</span></div><p>${d}</p></div>`).join('');
+  }
+  $('#menu-tabs').addEventListener('click', (e) => { const b = e.target.closest('[data-m]'); if (b) { meal = b.dataset.m; renderMenu(); } });
+
+  // ---------- tee times (demo) ----------
+  const bk = { day: 0, players: 2, holes: 18, tod: 'All', slot: null, done: null };
+  const days = [...Array(14)].map((_, i) => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + i); return d; });
+  const rnd = (seed) => () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  function slotsFor(d) {
+    const r = rnd(d.getFullYear() * 400 + d.getMonth() * 31 + d.getDate());
+    const out = [];
+    for (let m = 7 * 60; m <= 16 * 60 + 30; m += 10) {
+      const busy = r();
+      const open = busy < 0.35 ? 0 : busy < 0.55 ? 1 : busy < 0.7 ? 2 : busy < 0.8 ? 3 : 4;
+      out.push({ m, open });
+    }
+    return out;
+  }
+  const fmt = (m) => { const h = Math.floor(m / 60), mm = String(m % 60).padStart(2, '0'); return `${((h + 11) % 12) + 1}:${mm} ${h < 12 ? 'am' : 'pm'}`; };
+  const priceFor = (d, m) => { const s = seedSeason(d); const wkend = [0, 5, 6].includes(d.getDay()); if (bk.holes === 9) return s.nine; if (m >= 14 * 60) return s.twi; return s.base + (wkend ? 10 : 0); };
+  const seedSeason = (d) => seasonFor(d);
+  const segs = { players: [1, 2, 3, 4], 'holes-n': [18, 9], tod: ['All', 'Morning', 'Midday', 'Twilight'] };
+  function renderBooker() {
+    $('#days').innerHTML = days.map((d, i) => `<button class="day" aria-pressed="${i === bk.day}" data-i="${i}"><small>${d.toLocaleDateString('en-US', { weekday: 'short' })}</small><b>${d.getDate()}</b><small>${d.toLocaleDateString('en-US', { month: 'short' })}</small></button>`).join('');
+    const cur = { players: bk.players, 'holes-n': bk.holes, tod: bk.tod };
+    for (const [id, vals] of Object.entries(segs)) $('#' + id).innerHTML = vals.map((v) => `<button aria-pressed="${v === cur[id]}" data-v="${v}">${v}</button>`).join('');
+    const d = days[bk.day];
+    const inTod = (m) => bk.tod === 'All' || (bk.tod === 'Morning' && m < 11 * 60) || (bk.tod === 'Midday' && m >= 11 * 60 && m < 14 * 60) || (bk.tod === 'Twilight' && m >= 14 * 60);
+    const list = slotsFor(d).filter((s) => inTod(s.m) && (i => true)());
+    $('#slots').innerHTML = list.map((s) => {
+      const ok = s.open >= bk.players;
+      return `<button class="slot" data-m="${s.m}" ${ok ? '' : 'disabled'} aria-pressed="${bk.slot === s.m}"><b>${fmt(s.m)}</b><span>${s.open ? `${s.open} spot${s.open > 1 ? 's' : ''} open` : 'Booked'}</span><em>$${priceFor(d, s.m)} / player</em></button>`;
+    }).join('') || '<p class="note">No times match. Try another time of day.</p>';
+    renderSummary();
+  }
+  function renderSummary() {
+    const d = days[bk.day];
+    const el = $('#summary');
+    if (bk.done) {
+      el.innerHTML = `<div class="done"><div class="label">Reservation request received</div><h4>${fmt(bk.done.m)} · ${d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</h4>
+        <p>${bk.players} player${bk.players > 1 ? 's' : ''}, ${bk.holes} holes. Confirmation ${bk.done.ref}.</p><p class="note">This is a demonstration website, so no tee time was actually reserved.</p></div>
+        <button class="link" id="again">Book another time</button>`;
+      $('#again').onclick = () => { bk.done = null; bk.slot = null; renderBooker(); };
+      return;
+    }
+    if (bk.slot == null) {
+      el.innerHTML = `<div class="label">Your round</div><h3>Choose a time</h3><p class="note">Pick a date, the number of players and a tee time. Rates include cart, range balls and GPS.</p>`;
+      return;
+    }
+    const each = priceFor(d, bk.slot);
+    el.innerHTML = `<div class="label">Your round</div><h3>${fmt(bk.slot)}</h3>
+      <dl><dt>Date</dt><dd>${d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</dd><dt>Players</dt><dd>${bk.players}</dd><dt>Holes</dt><dd>${bk.holes}</dd><dt>Rate</dt><dd>$${each} / player</dd></dl>
+      <div class="total"><span>Total</span><span>$${each * bk.players}</span></div>
+      <form class="f" id="book-form">
+        <label>Name<input id="b-name" required autocomplete="name"></label>
+        <label>Email<input id="b-email" type="email" required autocomplete="email"></label>
+        <label>Phone<input id="b-phone" type="tel" autocomplete="tel"></label>
+        <button class="btn solid" type="submit">Reserve tee time</button>
+        <p class="note">Pay at the golf shop. Free cancellation up to 24 hours before.</p>
+      </form>`;
+    $('#book-form').addEventListener('submit', (e) => { e.preventDefault(); bk.done = { m: bk.slot, ref: 'RN-' + Math.random().toString(36).slice(2, 7).toUpperCase() }; renderSummary(); });
+  }
+  $('#days').addEventListener('click', (e) => { const b = e.target.closest('[data-i]'); if (b) { bk.day = +b.dataset.i; bk.slot = null; bk.done = null; renderBooker(); } });
+  $('#players').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (b) { bk.players = +b.dataset.v; bk.slot = null; renderBooker(); } });
+  $('#holes-n').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (b) { bk.holes = +b.dataset.v; renderBooker(); } });
+  $('#tod').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (b) { bk.tod = b.dataset.v; renderBooker(); } });
+  $('#slots').addEventListener('click', (e) => { const b = e.target.closest('[data-m]'); if (b && !b.disabled) { bk.slot = +b.dataset.m; bk.done = null; $$('.slot').forEach((s) => s.setAttribute('aria-pressed', s === b)); renderSummary(); } });
+
+  // ---------- forms ----------
+  const THANKS = { membership: ['Thank you', 'Our membership director will be in touch within two business days.'], events: ['Inquiry received', 'Our events team will reach out within one business day to talk dates and details.'], contact: ['Message sent', 'Thanks for reaching out. We reply to most messages within one business day.'] };
+  $$('form[data-form]').forEach((f) => f.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const [h, p] = THANKS[f.dataset.form];
+    f.outerHTML = `<div class="done"><h4>${h}</h4><p>${p}</p><p class="note">This is a demonstration website, so the message wasn't actually sent.</p></div>`;
+  }));
+  $$('[data-goto="events-form"]').forEach((b) => b.addEventListener('click', () => { $('#e-type').value = 'Wedding'; $('#e-name').focus(); $('#e-name').scrollIntoView({ block: 'center' }); }));
+
+  renderTees(); renderHoles(); renderCard(); renderRates(); renderMenu(); renderBooker(); renderMember();
+  route();
+})();
+</script>

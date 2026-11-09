@@ -1,0 +1,62 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Swing Check</title>
+<style>body { margin: 0; background: #222; } canvas { display: block; }</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<canvas id="cv"></canvas>
+<script type="module">
+// Dev tool: renders the 'ben' golfer at address, top, impact and finish from a
+// face-on (?view=face) or down-the-line (?view=dtl) camera, to compare with the videos.
+import * as THREE from 'three';
+import { Golfer } from '../src/golfer.js';
+
+const view = new URLSearchParams(location.search).get('view') || 'face';
+const W = 360, H = 640;
+const cv = document.getElementById('cv');
+const r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, preserveDrawingBuffer: true });
+r.setSize(W * 4, H);
+r.setScissorTest(true);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xb9c7cf);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x6b7a55, 1.6));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+sun.position.set(3, 6, 4);
+scene.add(sun);
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshStandardMaterial({ color: 0x7d8f5a }));
+ground.rotation.x = -Math.PI / 2;
+scene.add(ground);
+
+// Stand on hole 1's tee so address() can find ground height.
+const { HOLES } = await import('../src/course.js');
+const g = new Golfer('ben');
+scene.add(g.group);
+g.address(HOLES[0], HOLES[0].tee, [0, 1], 'iron', 150);
+const s = g.swing;
+const times = [-1, s.back, s.back + s.down, s.back + s.down + s.follow];
+
+const box = new THREE.Box3().setFromObject(g.group);
+const c = box.getCenter(new THREE.Vector3());
+const cam = new THREE.PerspectiveCamera(30, W / H, 0.1, 100);
+// Golfer faces +F (toward the ball); target is +T. Face-on = in front of the golfer.
+const T = new THREE.Vector3(1, 0, 0).applyQuaternion(g.group.quaternion);
+const F = new THREE.Vector3(0, 0, 1).applyQuaternion(g.group.quaternion);
+const eye = view === 'face' ? c.clone().addScaledVector(F, 7) : c.clone().addScaledVector(T, -7);
+eye.y = c.y + 0.3;
+cam.position.copy(eye);
+cam.lookAt(c.x, c.y + 0.25, c.z);
+
+times.forEach((t, i) => {
+  g.t0 = 0;
+  if (t < 0) { g.pose(-1); } else g.pose(t);
+  g.solve();
+  r.setViewport(i * W, 0, W, H);
+  r.setScissor(i * W, 0, W, H);
+  r.render(scene, cam);
+});
+window.checkDone = true;
+</script>
